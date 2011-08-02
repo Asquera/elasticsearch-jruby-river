@@ -7,4 +7,5 @@ cd ..
 jar cf script.jar lib/*
 mkdir -p plugins/river-jruby
 cp *.jar plugins/river-jruby
-zip river-jruby.zip jruby-complete-1.6.3.jar river-jruby.jar script.jar
+jar cf river-gems.jar -C gems/jruby/1.8/ .
+zip river-jruby.zip jruby-complete-1.6.3.jar river-gems.jar river-jruby.jar script.jar

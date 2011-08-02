@@ -1,0 +1,25 @@
+GIT
+  remote: git@github.com:Asquera/elsearch.git
+  revision: dfe3e48f78ac86fba8014b7ee77f4b214a69590e
+  branch: native_client
+  specs:
+    echolon (0.1.1)
+      addressable
+      rest-client
+      yajl-ruby
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    addressable (2.2.6)
+    mime-types (1.16)
+    rest-client (1.6.3)
+      mime-types (>= 1.16)
+    yajl-ruby (0.8.2)
+
+PLATFORMS
+  java
+
+DEPENDENCIES
+  bundler
+  echolon!

@@ -52,11 +52,11 @@ import org.jruby.runtime.builtin.IRubyObject;
 /**
  * @author Florian Gilcher (florian.gilcher@asquera.de)
  */
-public class JRubyRiver extends AbstractRiverComponent implements River throws Exception {
+public class JRubyRiver extends AbstractRiverComponent implements River {
     private ScriptingContainer container;
     private IRubyObject river;
     
-    @Inject public JRubyRiver(RiverName riverName, RiverSettings settings, Client client, ThreadPool threadPool) {        
+    @Inject public JRubyRiver(RiverName riverName, RiverSettings settings, Client client, ThreadPool threadPool) throws Exception {        
         super(riverName, settings);
         this.container = new ScriptingContainer();
         System.out.println("here");

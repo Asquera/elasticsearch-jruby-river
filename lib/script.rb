@@ -1,8 +1,11 @@
 require 'java'
+require 'rubygems'
+require 'bundler'
+Bundler.setup
+require 'echolon'
 
 class JRubyRiverModule
   def initialize(riverName, settings, client, threadPool)
-    puts "here"
     @riverName  = riverName
     @settings   = settings
     @client     = client
