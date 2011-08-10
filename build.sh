@@ -1,11 +1,11 @@
 #mkdir -p com/asquera/elasticsearch/plugins
 #jrubyc --verbose --java lib/JRubyRiverPlugin.rb
-javac -classpath "src:jruby-complete-1.6.3.jar:/usr/local/elasticsearch/lib/*" -s src src/com/asquera/elasticsearch/river/jruby/JRubyRiverModule.java src/com/asquera/elasticsearch/plugins/river/jruby/JRubyRiverPlugin.java src/com/asquera/elasticsearch/river/jruby/JRubyRiverModule.java
+bundle install --path gems
 cd src
 jar cf ../river-jruby.jar es-plugin.properties com/asquera/* 
 cd ..
 jar cf script.jar lib/*
 mkdir -p plugins/river-jruby
-cp *.jar plugins/river-jruby
+cp river-jruby.jar jruby-complete-1.6.3.jar plugins/river-jruby
 jar cf river-gems.jar -C gems/jruby/1.8/ .
-zip river-jruby.zip jruby-complete-1.6.3.jar river-gems.jar river-jruby.jar script.jar
+zip river-jruby.zip jruby-complete-1.6.3.jar river-jruby.jar

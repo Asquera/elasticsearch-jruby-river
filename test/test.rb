@@ -7,7 +7,9 @@ builder = org.elasticsearch.common.xcontent.XContentFactory;
 json = <<-JSON
 {
   "type": "jruby",
-  "jruby": {}
+  "jruby": {
+    "load_path": ["/home/vagrant/elasticsearch-jruby-river/river-gems.jar", "/home/vagrant/elasticsearch-jruby-river/script.jar"]
+  }
 }
 JSON
 settings = org.elasticsearch.common.settings.ImmutableSettings.settingsBuilder.put("cluster.name", "test-cluster-123").put("gateway.type", "none").put("number_of_shards", 1)

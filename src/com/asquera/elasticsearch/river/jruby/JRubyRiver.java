@@ -20,6 +20,12 @@
 package com.asquera.elasticsearch.river.jruby;
 
 import java.util.Map;
+import java.util.List;
+
+import java.net.URL;
+import java.net.MalformedURLException;
+
+import java.io.File;
 
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
@@ -59,25 +65,51 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
     @Inject public JRubyRiver(RiverName riverName, RiverSettings settings, Client client, ThreadPool threadPool) throws Exception {        
         super(riverName, settings);
         this.container = new ScriptingContainer();
-        System.out.println("here");
 
         if (settings.settings().containsKey("jruby")) {
             Map<String, Object> riverSettings = (Map<String, Object>) settings.settings().get("jruby");
             
             String className = XContentMapValues.nodeStringValue(riverSettings.get("ruby_class"), "JRubyRiverModule");
-            String scriptName = XContentMapValues.nodeStringValue(riverSettings.get("script_name"), "lib/script.rb");
-
-            logger.debug("running script [{}]", scriptName);
-            container.runScriptlet(PathType.CLASSPATH, scriptName);
+            String scriptName = XContentMapValues.nodeStringValue(riverSettings.get("script_name"), "lib/river.rb");
             Ruby runtime = getRuntime();
+            
+            List<String> loadPath = (List<String>)riverSettings.get("load_path");
+            
+            if (loadPath != null) {
+                for (String path : loadPath) {
+                    logger.info(path);
+                    runtime.getJRubyClassLoader().addURL(getURL(path));
+                } 
+            }
+
+            logger.info("running script [{}]", scriptName);
+            container.runScriptlet(PathType.CLASSPATH, scriptName);
             RubyClass klass = runtime.getClass(className);
             IRubyObject clientInstance = JavaUtil.convertJavaToRuby(runtime, client);
             IRubyObject threadPoolInstance = JavaUtil.convertJavaToRuby(runtime, threadPool);
             IRubyObject settingsInstance = JavaUtil.convertJavaToRuby(runtime, settings);
             IRubyObject nameInstance = JavaUtil.convertJavaToRuby(runtime, riverName);
-            this.river = RuntimeHelpers.invoke(runtime.getCurrentContext(), klass, "new", nameInstance, settingsInstance, clientInstance, threadPoolInstance);
+            IRubyObject loggerInstance = JavaUtil.convertJavaToRuby(runtime, logger);
+            
+            this.river = RuntimeHelpers.invoke(runtime.getCurrentContext(), klass, "new", nameInstance, settingsInstance, clientInstance, threadPoolInstance, loggerInstance);
         } else {
             throw new Exception("No options for jruby river found");
+        }
+    }
+    
+    private URL getURL(String target) throws MalformedURLException {
+        try {
+            // First try assuming a protocol is included
+            return new URL(target);
+        } catch (MalformedURLException e) {
+            // Assume file: protocol
+            File f = new File(target);
+            String path = target;
+            if (f.exists() && f.isDirectory() && !path.endsWith("/")) {
+                // URLClassLoader requires that directores end with slashes
+                path = path + "/";
+            }
+            return new URL("file", null, path);
         }
     }
 
