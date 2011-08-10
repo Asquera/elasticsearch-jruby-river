@@ -8,7 +8,9 @@ json = <<-JSON
 {
   "type": "jruby",
   "jruby": {
-    "load_path": ["/home/vagrant/elasticsearch-jruby-river/river-gems.jar", "/home/vagrant/elasticsearch-jruby-river/script.jar"]
+    "script_name": "lib/self_closing_river.rb",
+    "load_path": ["/home/vagrant/elasticsearch-jruby-river/river-libs.jar"],
+    "ruby_class": "SelfClosingRiver"
   }
 }
 JSON

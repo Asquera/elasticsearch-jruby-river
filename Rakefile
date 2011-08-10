@@ -23,18 +23,9 @@ task :scriptjar do
   system('jar cf river-libs.jar lib/*')
 end
 
-desc "package gems"
-task :gemjar do
-  system("bundle install --path gems")
-  system("jar cf river-gems.jar -C gems/jruby/1.8/ .")
-end
-
 desc "package the plugin"
 task :plugin do
   system("zip river-jruby.zip jruby-complete-1.6.3.jar river-jruby.jar river-libs.jar")
 end
 
-task :default => [:build, :libjar, :gemjar, :scriptjar,  :plugin]
-
-
-
+task :default => [:build, :libjar, :scriptjar,  :plugin]

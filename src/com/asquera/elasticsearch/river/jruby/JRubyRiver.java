@@ -69,7 +69,7 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         if (settings.settings().containsKey("jruby")) {
             Map<String, Object> riverSettings = (Map<String, Object>) settings.settings().get("jruby");
             
-            String className = XContentMapValues.nodeStringValue(riverSettings.get("ruby_class"), "JRubyRiverModule");
+            String className = XContentMapValues.nodeStringValue(riverSettings.get("ruby_class"), "River");
             String scriptName = XContentMapValues.nodeStringValue(riverSettings.get("script_name"), "lib/river.rb");
             Ruby runtime = getRuntime();
             
@@ -78,12 +78,15 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
             if (loadPath != null) {
                 for (String path : loadPath) {
                     logger.info(path);
-                    runtime.getJRubyClassLoader().addURL(getURL(path));
+                    container.getLoadPaths().add(path);
+                    container.getLoadPaths().add(path + "!lib");
+                    //runtime.getJRubyClassLoader().addURL(getURL(path));
                 } 
             }
 
             logger.info("running script [{}]", scriptName);
             container.runScriptlet(PathType.CLASSPATH, scriptName);
+            logger.info("grabbing class [{}]", className);
             RubyClass klass = runtime.getClass(className);
             IRubyObject clientInstance = JavaUtil.convertJavaToRuby(runtime, client);
             IRubyObject threadPoolInstance = JavaUtil.convertJavaToRuby(runtime, threadPool);
