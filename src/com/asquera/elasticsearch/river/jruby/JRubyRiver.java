@@ -52,6 +52,7 @@ import org.jruby.javasupport.JavaUtil;
 import org.jruby.RubyClass;
 import org.jruby.embed.ScriptingContainer;
 import org.jruby.embed.PathType;
+import org.jruby.embed.AttributeName;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.runtime.builtin.IRubyObject;
 
@@ -69,8 +70,17 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         if (settings.settings().containsKey("jruby")) {
             Map<String, Object> riverSettings = (Map<String, Object>) settings.settings().get("jruby");
             
-            String className = XContentMapValues.nodeStringValue(riverSettings.get("ruby_class"), "River");
-            String scriptName = XContentMapValues.nodeStringValue(riverSettings.get("script_name"), "lib/river.rb");
+            String className       = XContentMapValues.nodeStringValue(riverSettings.get("ruby_class"), "River");
+            String scriptName      = XContentMapValues.nodeStringValue(riverSettings.get("script_name"), "lib/river.rb");
+            String scriptDirectory = XContentMapValues.nodeStringValue(riverSettings.get("script_directory"), null);
+            
+            if (null != scriptDirectory) {
+                logger.info("changing for directory [{}]", scriptDirectory);
+                container.getLoadPaths().add(scriptDirectory);
+                container.setAttribute(AttributeName.BASE_DIR, scriptDirectory);
+                container.setCurrentDirectory(scriptDirectory);
+            }
+            
             Ruby runtime = getRuntime();
             
             List<String> loadPath = (List<String>)riverSettings.get("load_path");
@@ -79,13 +89,11 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
                 for (String path : loadPath) {
                     logger.info(path);
                     container.getLoadPaths().add(path);
-                    container.getLoadPaths().add(path + "!lib");
-                    //runtime.getJRubyClassLoader().addURL(getURL(path));
                 } 
             }
 
             logger.info("running script [{}]", scriptName);
-            container.runScriptlet(PathType.CLASSPATH, scriptName);
+            container.runScriptlet(PathType.RELATIVE, scriptName);
             logger.info("grabbing class [{}]", className);
             RubyClass klass = runtime.getClass(className);
             IRubyObject clientInstance = JavaUtil.convertJavaToRuby(runtime, client);

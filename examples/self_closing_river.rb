@@ -1,4 +1,5 @@
-require 'lib/river'
+puts "here"
+require 'river'
 
 # A river that does not thread and closes itself when done
 class SelfClosingRiver < River
