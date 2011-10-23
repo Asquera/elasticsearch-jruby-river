@@ -1,0 +1,37 @@
+apply plugin: 'java'
+
+version = '1.0'
+explodedDistDir = new File(distsDir, 'exploded')
+
+configurations.compile.transitive = true
+
+configurations {
+    dists
+    distLib {
+        visible = false
+        transitive = false
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Elasticsearch JRuby River', 'Implementation-Version': '0.1.0'
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenRepo name: "sonatype", urls: ["https://oss.sonatype.org/content/groups/public/"]
+}
+
+dependencies {
+    distLib group: "org.jruby", name: 'jruby-complete', version: "1.6.4"
+    compile group: "org.jruby", name: 'jruby-complete', version: "1.6.4"
+
+    compile group: "org.elasticsearch", name: 'elasticsearch', version: "0.17.8"
+}
+
+task zip(type: Zip, dependsOn: ['jar']) {
+    from jar.outputs.files
+    from configurations.distLib
+}

@@ -48,6 +48,7 @@ import org.elasticsearch.river.RiverSettings;
 import org.elasticsearch.threadpool.ThreadPool;
 
 import org.jruby.Ruby;
+import org.jruby.RubyModule;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.RubyClass;
 import org.jruby.embed.ScriptingContainer;
@@ -55,6 +56,11 @@ import org.jruby.embed.PathType;
 import org.jruby.embed.AttributeName;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.runtime.builtin.IRubyObject;
+import org.jruby.runtime.ThreadContext;
+import org.jruby.runtime.GlobalVariable;
+import org.jruby.anno.JRubyMethod;
+import static org.jruby.runtime.Visibility.*;
+import static org.jruby.CompatVersion.*;
 
 /**
  * @author Florian Gilcher (florian.gilcher@asquera.de)
@@ -82,6 +88,9 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
             }
             
             Ruby runtime = getRuntime();
+            runtime.defineVariable(new GlobalVariable(runtime, "$river", runtime.getNil()));
+            RubyModule kernel = runtime.getKernel();
+            kernel.defineAnnotatedMethods(JRubyRiver.class);
             
             List<String> loadPath = (List<String>)riverSettings.get("load_path");
             
@@ -95,6 +104,7 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
             logger.info("running script [{}]", scriptName);
             container.runScriptlet(PathType.RELATIVE, scriptName);
             logger.info("grabbing class [{}]", className);
+            
             RubyClass klass = runtime.getClass(className);
             IRubyObject clientInstance = JavaUtil.convertJavaToRuby(runtime, client);
             IRubyObject threadPoolInstance = JavaUtil.convertJavaToRuby(runtime, threadPool);
@@ -133,7 +143,16 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
     }
     
     private Ruby getRuntime() {
-       return container.getProvider().getRuntime();
+        return container.getProvider().getRuntime();
+    }
+    
+    private RubyClass river() {
+        return (RubyClass)getRuntime().getGlobalVariables().get("$river");
+    }
+    
+    @JRubyMethod(name = "river", required = 1, visibility = PRIVATE)
+    public static void river(ThreadContext context, IRubyObject recv, IRubyObject object) {
+        context.getRuntime().getGlobalVariables().set("$river", object);
     }
 
 }
