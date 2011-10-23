@@ -3,11 +3,7 @@ apply plugin: 'java'
 version = '1.0'
 
 configurations {
-    dists
-    distLib {
-        visible = false
-        transitive = false
-    }
+    distLib
 }
 
 jar {
