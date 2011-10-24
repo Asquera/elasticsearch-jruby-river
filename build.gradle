@@ -2,8 +2,16 @@ apply plugin: 'java'
 
 version = '1.0'
 
+sourceSets.test.resources.srcDirs 'src/test/java'
+
 configurations {
     distLib
+}
+
+if (hasProperty("xlint")) {
+  tasks.withType(Compile) { 
+      options.compilerArgs << "-Xlint:unchecked" 
+  }
 }
 
 jar {
@@ -22,9 +30,16 @@ dependencies {
     compile group: "org.jruby", name: 'jruby-complete', version: "1.6.4"
 
     compile group: "org.elasticsearch", name: 'elasticsearch', version: "0.17.8"
+
+    testCompile 'org.testng:testng:5.10:jdk15'
+
 }
 
 task zip(type: Zip, dependsOn: ['jar']) {
     from jar.outputs.files
     from configurations.distLib
+}
+
+test {
+    useTestNG()
 }

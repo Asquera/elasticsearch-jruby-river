@@ -74,7 +74,7 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         this.container = new ScriptingContainer();
 
         if (settings.settings().containsKey("jruby")) {
-            Map<String, Object> riverSettings = (Map<String, Object>) settings.settings().get("jruby");
+            Map<String, Object> riverSettings = (Map<String, Object>)settings.settings().get("jruby");
             
             String className       = XContentMapValues.nodeStringValue(riverSettings.get("ruby_class"), "River");
             String scriptName      = XContentMapValues.nodeStringValue(riverSettings.get("script_name"), "lib/river.rb");
