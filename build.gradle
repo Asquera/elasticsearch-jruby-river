@@ -22,7 +22,7 @@ jar {
 
 repositories {
     mavenCentral()
-    mavenRepo name: "sonatype", urls: ["https://oss.sonatype.org/content/groups/public/"]
+    mavenRepo name: "sonatype", url: "https://oss.sonatype.org/content/groups/public/"
 }
 
 dependencies {
