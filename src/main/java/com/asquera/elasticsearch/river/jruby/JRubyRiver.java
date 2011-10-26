@@ -73,49 +73,43 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
     @Inject public JRubyRiver(RiverName riverName, RiverSettings settings, Client client, ThreadPool threadPool) throws Exception {        
         super(riverName, settings);
         this.container = new ScriptingContainer(LocalContextScope.SINGLETHREAD);
-
-        if (settings.settings().containsKey("jruby")) {
-            Map<String, Object> riverSettings = (Map<String, Object>) settings.settings().get("jruby");
-            
-            String scriptName      = XContentMapValues.nodeStringValue(riverSettings.get("script_name"), "lib/river.rb");
-            String scriptDirectory = XContentMapValues.nodeStringValue(riverSettings.get("script_directory"), null);
-            
-            if (null != scriptDirectory) {
-                logger.info("changing for directory [{}]", scriptDirectory);
-                container.getLoadPaths().add(scriptDirectory);
-                container.setAttribute(AttributeName.BASE_DIR, scriptDirectory);
-                container.setCurrentDirectory(scriptDirectory);
-            }
-            
-            Ruby runtime = getRuntime();
-            runtime.defineVariable(new GlobalVariable(runtime, "$river", runtime.getNil()));
-            RubyModule kernel = runtime.getKernel();
-            kernel.defineAnnotatedMethods(JRubyRiver.class);
-            
-            List<String> loadPath = (List<String>)riverSettings.get("load_path");
-            
-            if (loadPath != null) {
-                for (String path : loadPath) {
-                    logger.info(path);
-                    container.getLoadPaths().add(path);
-                } 
-            }
-
-            logger.info("running script [{}]", scriptName);
-            container.runScriptlet(PathType.RELATIVE, scriptName);
-            logger.info("found river class [{}]", river());
-            
-            RubyClass klass = river();
-            IRubyObject clientInstance = JavaUtil.convertJavaToRuby(runtime, client);
-            IRubyObject threadPoolInstance = JavaUtil.convertJavaToRuby(runtime, threadPool);
-            IRubyObject settingsInstance = JavaUtil.convertJavaToRuby(runtime, settings);
-            IRubyObject nameInstance = JavaUtil.convertJavaToRuby(runtime, riverName);
-            IRubyObject loggerInstance = JavaUtil.convertJavaToRuby(runtime, logger);
-            
-            this.river = RuntimeHelpers.invoke(runtime.getCurrentContext(), klass, "new", nameInstance, settingsInstance, clientInstance, threadPoolInstance, loggerInstance);
+        
+        Map <String, Object> riverSettings = (Map<String, Object>) settings.settings().get("jruby");
+        String scriptName = null;
+        String scriptDirectory = null;
+        
+        if (null != riverSettings) {
+            scriptName      = XContentMapValues.nodeStringValue(riverSettings.get("script_name"), "scripts/" +  riverName.name() + ".rb");
+            scriptDirectory = XContentMapValues.nodeStringValue(riverSettings.get("script_directory"), null);
         } else {
-            throw new Exception("No options for jruby river found");
+            scriptName      = "scripts/" +  riverName.name() + ".rb";
         }
+        
+        if (null != scriptDirectory) {
+            logger.info("changing to script directory [{}]", scriptDirectory);
+            container.setAttribute(AttributeName.BASE_DIR, scriptDirectory);
+            container.setCurrentDirectory(scriptDirectory);
+        }
+        
+        Ruby runtime = getRuntime();
+        runtime.defineVariable(new GlobalVariable(runtime, "$river", runtime.getNil()));
+        
+        RubyModule kernel = runtime.getKernel();
+        kernel.defineAnnotatedMethods(JRubyRiver.class);
+        
+        logger.info("running script [{}]", scriptName);
+        container.runScriptlet(PathType.RELATIVE, scriptName);
+        
+        logger.info("found river class [{}]", river());
+        
+        RubyClass klass = river();
+        IRubyObject clientInstance = JavaUtil.convertJavaToRuby(runtime, client);
+        IRubyObject threadPoolInstance = JavaUtil.convertJavaToRuby(runtime, threadPool);
+        IRubyObject settingsInstance = JavaUtil.convertJavaToRuby(runtime, settings);
+        IRubyObject nameInstance = JavaUtil.convertJavaToRuby(runtime, riverName);
+        IRubyObject loggerInstance = JavaUtil.convertJavaToRuby(runtime, logger);
+        
+        this.river = RuntimeHelpers.invoke(runtime.getCurrentContext(), klass, "new", nameInstance, settingsInstance, clientInstance, threadPoolInstance, loggerInstance);
     }
 
     @Override public void start() {
@@ -128,9 +122,9 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
 
     @Override public void close() {
         try {
-          RuntimeHelpers.invoke(getRuntime().getCurrentContext(), this.river, "close");
+            RuntimeHelpers.invoke(getRuntime().getCurrentContext(), this.river, "close");
         } catch (Exception e) {
-          logger.error("error in River#close [{}]", e);
+            logger.error("error in River#close [{}]", e);
         }
     }
     
