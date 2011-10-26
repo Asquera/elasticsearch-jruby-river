@@ -61,6 +61,7 @@ import org.jruby.runtime.GlobalVariable;
 import org.jruby.anno.JRubyMethod;
 import static org.jruby.runtime.Visibility.*;
 import static org.jruby.CompatVersion.*;
+import org.jruby.embed.LocalContextScope;
 
 /**
  * @author Florian Gilcher (florian.gilcher@asquera.de)
@@ -71,7 +72,7 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
     
     @Inject public JRubyRiver(RiverName riverName, RiverSettings settings, Client client, ThreadPool threadPool) throws Exception {        
         super(riverName, settings);
-        this.container = new ScriptingContainer();
+        this.container = new ScriptingContainer(LocalContextScope.SINGLETHREAD);
 
         if (settings.settings().containsKey("jruby")) {
             Map<String, Object> riverSettings = (Map<String, Object>) settings.settings().get("jruby");
@@ -117,29 +118,21 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
             throw new Exception("No options for jruby river found");
         }
     }
-    
-    private URL getURL(String target) throws MalformedURLException {
+
+    @Override public void start() {
         try {
-            // First try assuming a protocol is included
-            return new URL(target);
-        } catch (MalformedURLException e) {
-            // Assume file: protocol
-            File f = new File(target);
-            String path = target;
-            if (f.exists() && f.isDirectory() && !path.endsWith("/")) {
-                // URLClassLoader requires that directores end with slashes
-                path = path + "/";
-            }
-            return new URL("file", null, path);
+            RuntimeHelpers.invoke(getRuntime().getCurrentContext(), this.river, "start");
+        } catch (Exception e) {
+            logger.error("error in River#start [{}]", e);
         }
     }
 
-    @Override public void start() {
-        RuntimeHelpers.invoke(getRuntime().getCurrentContext(), this.river, "start");
-    }
-
     @Override public void close() {
-        RuntimeHelpers.invoke(getRuntime().getCurrentContext(), this.river, "close");
+        try {
+          RuntimeHelpers.invoke(getRuntime().getCurrentContext(), this.river, "close");
+        } catch (Exception e) {
+          logger.error("error in River#close [{}]", e);
+        }
     }
     
     private Ruby getRuntime() {
