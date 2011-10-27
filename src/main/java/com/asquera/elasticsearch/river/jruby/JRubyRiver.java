@@ -111,8 +111,8 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         RubyModule kernel = runtime.getKernel();
         kernel.defineAnnotatedMethods(KernelMethods.class);
         
-        RubyModule settings = runtime.defineModule("RiverSettings");
-        settings.defineAnnotatedMethods(RiverSettingsModule.class);
+        RubyModule river_settings = runtime.defineModule("RiverSettings");
+        river_settings.defineAnnotatedMethods(RiverSettingsModule.class);
         
         GlobalVariables vars = runtime.getGlobalVariables();
         runtime.defineVariable(new GlobalVariable(runtime, "$river", runtime.getNil()));
