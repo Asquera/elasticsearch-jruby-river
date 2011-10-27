@@ -25,5 +25,20 @@ public class JRubyRiverPluginTests {
        
        assert "value1".equals(sourceMap.get("field1"));
    }
+   
+   @Test
+   public void testRiverSimple() throws Exception {
+       Node node = NodeBuilder.nodeBuilder().node();
+       
+       node.client().prepareIndex("_river", "test2", "_meta").setSource(jsonBuilder().startObject().field("type", "jruby").endObject()).execute().actionGet();
+
+       Thread.sleep(30000);
+
+       GetResponse response = node.client().prepareGet("test2", "type2", "1").execute().actionGet();
+       
+       Map<String, Object> sourceMap = response.sourceAsMap();
+       
+       assert "value1".equals(sourceMap.get("field1"));
+   }
  
 }

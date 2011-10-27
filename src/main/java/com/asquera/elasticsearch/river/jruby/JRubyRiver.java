@@ -30,6 +30,7 @@ import org.elasticsearch.threadpool.ThreadPool;
 
 import org.jruby.Ruby;
 import org.jruby.RubyModule;
+import org.jruby.RubyObject;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.RubyClass;
 import org.jruby.embed.ScriptingContainer;
@@ -84,9 +85,13 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         container.runScriptlet(PathType.RELATIVE, scriptName);
         logger.info("found river class [{}]", river(runtime));
 
-        RubyClass klass = river(runtime);
-
-        this.river = RuntimeHelpers.invoke(runtime.getCurrentContext(), klass, "new");
+        IRubyObject klass = river(runtime);
+        
+        if (klass.isNil()) {
+            this.river = toplevel();
+        } else {
+            this.river = RuntimeHelpers.invoke(runtime.getCurrentContext(), klass, "new");            
+        }
     }
 
     @Override public void start() {
@@ -105,14 +110,18 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         }
     }
     
+    private RubyObject toplevel() {
+        return (RubyObject)getRuntime().getTopSelf();
+    }
+    
     private Ruby setupRuntime() {
         Ruby runtime = getRuntime();
         
         RubyModule kernel = runtime.getKernel();
         kernel.defineAnnotatedMethods(KernelMethods.class);
         
-        RubyModule river_settings = runtime.defineModule("RiverSettings");
-        river_settings.defineAnnotatedMethods(RiverSettingsModule.class);
+        RubyModule riverSettings = runtime.defineModule("RiverSettings");
+        riverSettings.defineAnnotatedMethods(RiverSettingsModule.class);
         
         GlobalVariables vars = runtime.getGlobalVariables();
         runtime.defineVariable(new GlobalVariable(runtime, "$river", runtime.getNil()));
@@ -122,6 +131,8 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         runtime.defineVariable(new GlobalVariable(runtime, "$name", JavaUtil.convertJavaToRuby(runtime, riverName.name())));
         runtime.defineVariable(new GlobalVariable(runtime, "$logger", JavaUtil.convertJavaToRuby(runtime, logger)));
         
+        toplevel().extend(new IRubyObject[]{riverSettings});
+        
         return runtime;
     }
     
@@ -129,7 +140,7 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         return container.getProvider().getRuntime();
     }
     
-    private RubyClass river(Ruby runtime) {
-        return (RubyClass)runtime.getGlobalVariables().get("$river");
+    private IRubyObject river(Ruby runtime) {
+        return runtime.getGlobalVariables().get("$river");
     }
 }
