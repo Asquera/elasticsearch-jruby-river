@@ -1,6 +1,6 @@
 # JRuby Rivers for ElasticSearch
 
-This is a meta river that allows you to implement Rivers using JRuby.
+This is a meta river that allows you to implement Rivers using JRuby. As an added bonus, allows those rivers to be changed and reloaded at cluster runtime.
 
 ## Minor warning
 
