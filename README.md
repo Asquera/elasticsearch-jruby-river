@@ -4,8 +4,7 @@ This is a meta river that allows you to implement Rivers using JRuby. As an adde
 
 ## Minor warning
 
-At the moment, this plugin is compiled and tested against ElasticSearch 0.17. It should work with
-0.18, though.
+At the moment, this plugin is compiled and tested against ElasticSearch 0.17. It should work with 0.18, though.
 
 ## Installation
 
@@ -138,7 +137,7 @@ Most rivers involve running threads. If you want to play nice, use ElasticSearch
       end
 
       def start
-        @greeter = thread "greeter" do
+        @greeter = thread do
           puts 'hello'
         end
       end
@@ -148,6 +147,20 @@ Most rivers involve running threads. If you want to play nice, use ElasticSearch
         @greeter.interrupt unless @closed
       end
     end
+    
+## Developing
+
+Get gradle [gradle.org], and run:
+
+    gradle zip
+
+To test, run:
+
+    gradle zip
+
+Install using:
+
+    bin/plugin install river-jruby -url file://./build/distributions/elasticsearch-jruby-river-<version>.zip
 
 ### TODO
 
