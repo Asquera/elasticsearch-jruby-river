@@ -1,11 +1,8 @@
 class TestRiver
-  def initialize(name, settings, client, *others)
-    @name = name.name()
-    @client = client
-  end
-
+  include RiverSettings
+  
   def start
-    @client.prepareIndex("test", "type1", "1").setSource("field1", "value1").execute.actionGet
+    client.prepareIndex("test", "type1", "1").setSource("field1", "value1").execute.actionGet
   end
 
   def close
