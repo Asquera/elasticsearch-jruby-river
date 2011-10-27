@@ -2,6 +2,11 @@
 
 This is a meta river that allows you to implement Rivers using JRuby.
 
+## Minor warning
+
+At the moment, this plugin is compiled and tested against ElasticSearch 0.17. It should work with
+0.18, though.
+
 ## Installation
 
     bin/plugin install river-jruby -url https://github.com/downloads/Asquera/elasticsearch-jruby-river/elasticsearch-jruby-river-1.1.zip
