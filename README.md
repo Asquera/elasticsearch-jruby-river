@@ -138,7 +138,7 @@ Most rivers involve running threads. If you want to play nice, use ElasticSearch
       end
 
       def start
-        @greeter = thread do
+        @greeter = thread "greeter" do
           puts 'hello'
         end
       end
