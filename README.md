@@ -58,6 +58,8 @@ Be aware that the `settings` module gives access to both the global cluster sett
 
     settings.settings #=> The river configuration
     settings.globalSettings #=> The global configuration
+    
+`RiverSettings` is automatically mixed into the toplevel object.
 
 ## Advanced usage
 
@@ -156,7 +158,7 @@ Get gradle [gradle.org], and run:
 
 To test, run:
 
-    gradle zip
+    gradle test
 
 Install using:
 
