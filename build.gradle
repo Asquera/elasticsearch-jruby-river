@@ -28,10 +28,10 @@ repositories {
 }
 
 dependencies {
-    distLib group: "org.jruby", name: 'jruby-complete', version: "1.6.4"
-    compile group: "org.jruby", name: 'jruby-complete', version: "1.6.4"
+    distLib group: "org.jruby", name: 'jruby-complete', version: "1.6.5"
+    compile group: "org.jruby", name: 'jruby-complete', version: "1.6.5"
 
-    compile group: "org.elasticsearch", name: 'elasticsearch', version: "0.17.8"
+    compile group: "org.elasticsearch", name: 'elasticsearch', version: "0.18.1"
 
     testCompile 'org.testng:testng:5.10:jdk15'
 
