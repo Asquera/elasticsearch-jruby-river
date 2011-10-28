@@ -62,7 +62,8 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         
         this.container = new ScriptingContainer(LocalContextScope.SINGLETHREAD);
         
-        Map <String, Object> riverSettings = (Map<String, Object>) settings.settings().get("jruby");
+        Map <String, Object> riverSettings = jrubySettings(settings);
+
         String scriptName = null;
         String scriptDirectory = null;
         
@@ -92,6 +93,11 @@ public class JRubyRiver extends AbstractRiverComponent implements River {
         } else {
             this.river = RuntimeHelpers.invoke(runtime.getCurrentContext(), klass, "new");            
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> jrubySettings(RiverSettings settings) {
+         return (Map<String,Object>) settings.settings().get("jruby");
     }
 
     @Override public void start() {
